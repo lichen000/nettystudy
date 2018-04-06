@@ -3877,7 +3877,6 @@
         return len ? fn(elems[0], key) : emptyGet;
     };
 
-
 // Matches dashed string for camelizing
     var rmsPrefix = /^-ms-/,
         rdashAlpha = /-([a-z])/g;
@@ -3904,7 +3903,6 @@
         //    - Any
         return owner.nodeType === 1 || owner.nodeType === 9 || !(+owner.nodeType);
     };
-
 
     function Data() {
         this.expando = jQuery.expando + Data.uid++;
@@ -4134,7 +4132,7 @@
 
         removeData: function (elem, name) {
             dataUser.remove(elem, name);
-        },
+        }
     });
 
     jQuery.fn.extend({
@@ -4219,7 +4217,6 @@
             });
         }
     });
-
 
     jQuery.extend({
         queue: function (elem, type, data) {
@@ -4351,7 +4348,6 @@
             return defer.promise(obj);
         }
     });
-    var pnum = (/[+-]?(?:\d*\.|)\d+(?:[eE][+-]?\d+|)/).source;
 
     var rtagName = (/<([a-z][^\/\0>\x20\t\r\n\f]+)/i);
 
@@ -4380,7 +4376,6 @@
         return ret;
     }
 
-
 // Mark scripts as having already been evaluated
     function setGlobalEval(elems, refElements) {
         var i = 0,
@@ -4394,7 +4389,6 @@
             );
         }
     }
-
 
     var rhtml = /<|&#?\w+;/;
 
@@ -4487,34 +4481,7 @@
         return fragment;
     }
 
-
-    (function () {
-        var fragment = document.createDocumentFragment(),
-            div = fragment.appendChild(document.createElement("div")),
-            input = document.createElement("input");
-
-        // Support: Android 4.0 - 4.3 only
-        // Check state lost if the name is set (#11217)
-        // Support: Windows Web Apps (WWA)
-        // `name` and `type` must use .setAttribute for WWA (#14901)
-        input.setAttribute("type", "radio");
-        input.setAttribute("checked", "checked");
-        input.setAttribute("name", "t");
-
-        div.appendChild(input);
-
-        // Support: Android <=4.1 only
-        // Older WebKit doesn't clone checked state correctly in fragments
-        support.checkClone = div.cloneNode(true).cloneNode(true).lastChild.checked;
-
-        // Support: IE <=11 only
-        // Make sure textarea (and checkbox) defaultValue is properly cloned
-        div.innerHTML = "<textarea>x</textarea>";
-        support.noCloneChecked = !!div.cloneNode(true).lastChild.defaultValue;
-    })();
     var documentElement = document.documentElement;
-
-
     var
         rkeyEvent = /^key/,
         rmouseEvent = /^(?:mouse|pointer|contextmenu|drag|drop)|click/,
@@ -8105,26 +8072,6 @@
         }).length;
     };
 
-    jQuery.each(("blur focus focusin focusout resize scroll click dblclick " +
-        "mousedown mouseup mousemove mouseover mouseout mouseenter mouseleave " +
-        "change select submit keydown keypress keyup contextmenu").split(" "),
-        function (i, name) {
-
-            // Handle event binding
-            jQuery.fn[name] = function (data, fn) {
-                return arguments.length > 0 ?
-                    this.on(name, null, data, fn) :
-                    this.trigger(name);
-            };
-        });
-
-    jQuery.fn.extend({
-
-        bind: function (types, data, fn) {
-            return this.on(types, null, data, fn);
-        }
-    });
-
 // Bind a function to a context, optionally partially applying any
 // arguments.
 // jQuery.proxy is deprecated to promote standards (specifically Function#bind)
@@ -8207,9 +8154,7 @@
         });
     }
 
-
     var
-
         // Map over jQuery in case of overwrite
         _jQuery = window.jQuery,
 
