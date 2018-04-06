@@ -73,7 +73,6 @@
         return typeof obj === "function" && typeof obj.nodeType !== "number";
     };
 
-
     var isWindow = function isWindow(obj) {
         return obj != null && obj === obj.window;
     };
@@ -2736,39 +2735,6 @@
     jQuery.uniqueSort = jQuery.unique = Sizzle.uniqueSort;
     jQuery.text = Sizzle.getText;
     jQuery.isXMLDoc = Sizzle.isXML;
-    jQuery.contains = Sizzle.contains;
-    jQuery.escapeSelector = Sizzle.escape;
-
-
-    var dir = function (elem, dir, until) {
-        var matched = [],
-            truncate = until !== undefined;
-
-        while ((elem = elem[dir]) && elem.nodeType !== 9) {
-            if (elem.nodeType === 1) {
-                if (truncate && jQuery(elem).is(until)) {
-                    break;
-                }
-                matched.push(elem);
-            }
-        }
-        return matched;
-    };
-
-    var siblings = function (n, elem) {
-        var matched = [];
-
-        for (; n; n = n.nextSibling) {
-            if (n.nodeType === 1 && n !== elem) {
-                matched.push(n);
-            }
-        }
-
-        return matched;
-    };
-
-
-    var rneedsContext = jQuery.expr.match.needsContext;
 
     function nodeName(elem, name) {
 
@@ -2849,18 +2815,6 @@
         },
         not: function (selector) {
             return this.pushStack(winnow(this, selector || [], true));
-        },
-        is: function (selector) {
-            return !!winnow(
-                this,
-
-                // If this is a positional/relative selector, check membership in the returned set
-                // so $("p:first").is("p:last") won't return true for a doc with two "p".
-                typeof selector === "string" && rneedsContext.test(selector) ?
-                    jQuery(selector) :
-                    selector || [],
-                false
-            ).length;
         }
     });
 
@@ -3030,32 +2984,10 @@
                     jQuery.merge(this.get(), jQuery(selector, context))
                 )
             );
-        },
+        }
     });
 
-    function sibling(cur, dir) {
-        while ((cur = cur[dir]) && cur.nodeType !== 1) {
-        }
-        return cur;
-    }
-
     jQuery.each({
-        parent: function (elem) {
-            var parent = elem.parentNode;
-            return parent && parent.nodeType !== 11 ? parent : null;
-        },
-        next: function (elem) {
-            return sibling(elem, "nextSibling");
-        },
-        prev: function (elem) {
-            return sibling(elem, "previousSibling");
-        },
-        prevAll: function (elem) {
-            return dir(elem, "previousSibling");
-        },
-        children: function (elem) {
-            return siblings(elem.firstChild);
-        },
         contents: function (elem) {
             if (nodeName(elem, "iframe")) {
                 return elem.contentDocument;
@@ -3294,9 +3226,6 @@
                     }
                     return this;
                 },
-                locked: function () {
-                    return !!locked;
-                },
 
                 // Call all callbacks with the given context and arguments
                 fireWith: function (context, args) {
@@ -3315,11 +3244,6 @@
                 fire: function () {
                     self.fireWith(this, arguments);
                     return this;
-                },
-
-                // To know if the callbacks have already been called at least once
-                fired: function () {
-                    return !!fired;
                 }
             };
 
@@ -3393,38 +3317,6 @@
                     },
                     "catch": function (fn) {
                         return promise.then(null, fn);
-                    },
-
-                    // Keep pipe for back-compat
-                    pipe: function (/* fnDone, fnFail, fnProgress */) {
-                        var fns = arguments;
-
-                        return jQuery.Deferred(function (newDefer) {
-                            jQuery.each(tuples, function (i, tuple) {
-
-                                // Map tuples (progress, done, fail) to arguments (done, fail, progress)
-                                var fn = isFunction(fns[tuple[4]]) && fns[tuple[4]];
-
-                                // deferred.progress(function() { bind to newDefer or newDefer.notify })
-                                // deferred.done(function() { bind to newDefer or newDefer.resolve })
-                                // deferred.fail(function() { bind to newDefer or newDefer.reject })
-                                deferred[tuple[1]](function () {
-                                    var returned = fn && fn.apply(this, arguments);
-                                    if (returned && isFunction(returned.promise)) {
-                                        returned.promise()
-                                            .progress(newDefer.notify)
-                                            .done(newDefer.resolve)
-                                            .fail(newDefer.reject);
-                                    } else {
-                                        newDefer[tuple[0] + "With"](
-                                            this,
-                                            fn ? [returned] : arguments
-                                        );
-                                    }
-                                });
-                            });
-                            fns = null;
-                        }).promise();
                     },
                     then: function (onFulfilled, onRejected, onProgress) {
                         var maxDepth = 0;
@@ -3605,9 +3497,6 @@
                 var list = tuple[2],
                     stateString = tuple[5];
 
-                // promise.progress = list.add
-                // promise.done = list.add
-                // promise.fail = list.add
                 promise[tuple[1]] = list.add;
 
                 // Handle state
@@ -3641,17 +3530,11 @@
                 // rejected_handlers.fire
                 list.add(tuple[3].fire);
 
-                // deferred.notify = function() { deferred.notifyWith(...) }
-                // deferred.resolve = function() { deferred.resolveWith(...) }
-                // deferred.reject = function() { deferred.rejectWith(...) }
                 deferred[tuple[0]] = function () {
                     deferred[tuple[0] + "With"](this === deferred ? undefined : this, arguments);
                     return this;
                 };
 
-                // deferred.notifyWith = list.fireWith
-                // deferred.resolveWith = list.fireWith
-                // deferred.rejectWith = list.fireWith
                 deferred[tuple[0] + "With"] = list.fireWith;
             });
 
@@ -4483,8 +4366,6 @@
 
     var documentElement = document.documentElement;
     var
-        rkeyEvent = /^key/,
-        rmouseEvent = /^(?:mouse|pointer|contextmenu|drag|drop)|click/,
         rtypenamespace = /^([^.]*)(?:\.(.+)|)/;
 
     function returnTrue() {
@@ -4883,34 +4764,6 @@
             return handlerQueue;
         },
 
-        addProp: function (name, hook) {
-            Object.defineProperty(jQuery.Event.prototype, name, {
-                enumerable: true,
-                configurable: true,
-
-                get: isFunction(hook) ?
-                    function () {
-                        if (this.originalEvent) {
-                            return hook(this.originalEvent);
-                        }
-                    } :
-                    function () {
-                        if (this.originalEvent) {
-                            return this.originalEvent[name];
-                        }
-                    },
-
-                set: function (value) {
-                    Object.defineProperty(this, name, {
-                        enumerable: true,
-                        configurable: true,
-                        writable: true,
-                        value: value
-                    });
-                }
-            });
-        },
-
         fix: function (originalEvent) {
             return originalEvent[jQuery.expando] ?
                 originalEvent :
@@ -5054,67 +4907,6 @@
         }
     };
 
-// Includes all common event props including KeyEvent and MouseEvent specific props
-    jQuery.each({
-        altKey: true,
-        bubbles: true,
-        cancelable: true,
-        changedTouches: true,
-        ctrlKey: true,
-        detail: true,
-        eventPhase: true,
-        metaKey: true,
-        pageX: true,
-        pageY: true,
-        shiftKey: true,
-        view: true,
-        "char": true,
-        charCode: true,
-        key: true,
-        keyCode: true,
-        button: true,
-        buttons: true,
-        clientX: true,
-        clientY: true,
-        offsetX: true,
-        offsetY: true,
-        pointerId: true,
-        pointerType: true,
-        screenX: true,
-        screenY: true,
-        targetTouches: true,
-        toElement: true,
-        touches: true,
-
-        which: function (event) {
-            var button = event.button;
-
-            // Add which for key events
-            if (event.which == null && rkeyEvent.test(event.type)) {
-                return event.charCode != null ? event.charCode : event.keyCode;
-            }
-
-            // Add which for click: 1 === left; 2 === middle; 3 === right
-            if (!event.which && button !== undefined && rmouseEvent.test(event.type)) {
-                if (button & 1) {
-                    return 1;
-                }
-
-                if (button & 2) {
-                    return 3;
-                }
-
-                if (button & 4) {
-                    return 2;
-                }
-
-                return 0;
-            }
-
-            return event.which;
-        }
-    }, jQuery.event.addProp);
-
     jQuery.fn.extend({
 
         on: function (types, selector, data, fn) {
@@ -5158,11 +4950,7 @@
         }
     });
 
-
     var
-
-        /* eslint-disable max-len */
-
         // See https://github.com/eslint/eslint/issues/3229
         rxhtmlTag = /<(?!area|br|col|embed|hr|img|input|link|meta|param)(([a-z][^\/\0>\x20\t\r\n\f]*)[^>]*)\/>/gi,
 
@@ -5463,64 +5251,12 @@
             }, null, value, arguments.length);
         },
 
-        append: function () {
-            return domManip(this, arguments, function (elem) {
-                if (this.nodeType === 1 || this.nodeType === 11 || this.nodeType === 9) {
-                    var target = manipulationTarget(this, elem);
-                    target.appendChild(elem);
-                }
-            });
-        },
-
         prepend: function () {
             return domManip(this, arguments, function (elem) {
                 if (this.nodeType === 1 || this.nodeType === 11 || this.nodeType === 9) {
                     var target = manipulationTarget(this, elem);
                     target.insertBefore(elem, target.firstChild);
                 }
-            });
-        },
-
-        before: function () {
-            return domManip(this, arguments, function (elem) {
-                if (this.parentNode) {
-                    this.parentNode.insertBefore(elem, this);
-                }
-            });
-        },
-
-        after: function () {
-            return domManip(this, arguments, function (elem) {
-                if (this.parentNode) {
-                    this.parentNode.insertBefore(elem, this.nextSibling);
-                }
-            });
-        },
-
-        empty: function () {
-            var elem,
-                i = 0;
-
-            for (; (elem = this[i]) != null; i++) {
-                if (elem.nodeType === 1) {
-
-                    // Prevent memory leaks
-                    jQuery.cleanData(getAll(elem, false));
-
-                    // Remove any remaining nodes
-                    elem.textContent = "";
-                }
-            }
-
-            return this;
-        },
-
-        clone: function (dataAndEvents, deepDataAndEvents) {
-            dataAndEvents = dataAndEvents == null ? false : dataAndEvents;
-            deepDataAndEvents = deepDataAndEvents == null ? dataAndEvents : deepDataAndEvents;
-
-            return this.map(function () {
-                return jQuery.clone(this, dataAndEvents, deepDataAndEvents);
             });
         },
 
@@ -5695,9 +5431,6 @@
     };
 
     jQuery.fx = Tween.prototype.init;
-
-// Back compat <1.8 extension point
-    jQuery.fx.step = {};
 
     var
         fxNow, inProgress,
@@ -6167,37 +5900,11 @@
         };
     }
 
-    jQuery.each([
-        "tabIndex",
-        "readOnly",
-        "maxLength",
-        "useMap",
-        "frameBorder",
-        "contentEditable"
-    ], function () {
-        jQuery.propFix[this.toLowerCase()] = this;
-    });
-
-
     // Strip and collapse whitespace according to HTML spec
     // https://infra.spec.whatwg.org/#strip-and-collapse-ascii-whitespace
     function stripAndCollapse(value) {
         var tokens = value.match(rnothtmlwhite) || [];
         return tokens.join(" ");
-    }
-
-    function getClass(elem) {
-        return elem.getAttribute && elem.getAttribute("class") || "";
-    }
-
-    function classesToArray(value) {
-        if (Array.isArray(value)) {
-            return value;
-        }
-        if (typeof value === "string") {
-            return value.match(rnothtmlwhite) || [];
-        }
-        return [];
     }
 
     var rreturn = /\r/g;
@@ -6614,10 +6321,7 @@
 
 
     var
-        rbracket = /\[\]$/,
-        rCRLF = /\r?\n/g,
-        rsubmitterTypes = /^(?:submit|button|image|reset|file)$/i,
-        rsubmittable = /^(?:input|select|textarea|keygen)/i;
+        rbracket = /\[\]$/;
 
     function buildParams(prefix, obj, traditional, add) {
         var name;
@@ -6693,41 +6397,6 @@
         // Return the resulting serialization
         return s.join("&");
     };
-
-    jQuery.fn.extend({
-        serializeArray: function () {
-            return this.map(function () {
-
-                // Can add propHook for "elements" to filter or add form elements
-                var elements = jQuery.prop(this, "elements");
-                return elements ? jQuery.makeArray(elements) : this;
-            })
-                .filter(function () {
-                    var type = this.type;
-
-                    // Use .is( ":disabled" ) so that fieldset[disabled] works
-                    return this.name && !jQuery(this).is(":disabled") &&
-                        rsubmittable.test(this.nodeName) && !rsubmitterTypes.test(type) &&
-                        (this.checked || !rcheckableType.test(type));
-                })
-                .map(function (i, elem) {
-                    var val = jQuery(this).val();
-
-                    if (val == null) {
-                        return null;
-                    }
-
-                    if (Array.isArray(val)) {
-                        return jQuery.map(val, function (val) {
-                            return {name: elem.name, value: val.replace(rCRLF, "\r\n")};
-                        });
-                    }
-
-                    return {name: elem.name, value: val.replace(rCRLF, "\r\n")};
-                }).get();
-        }
-    });
-
 
     var
         r20 = /%20/g,
@@ -7020,18 +6689,6 @@
             processData: true,
             async: true,
             contentType: "application/x-www-form-urlencoded; charset=UTF-8",
-
-            /*
-		timeout: 0,
-		data: null,
-		dataType: null,
-		username: null,
-		password: null,
-		cache: null,
-		throws: false,
-		traditional: false,
-		headers: {},
-		*/
 
             accepts: {
                 "*": allTypes,
@@ -7599,7 +7256,7 @@
                     self.append(html);
                 }
             });
-        },
+        }
     });
 
     jQuery.ajaxSettings.xhr = function () {
