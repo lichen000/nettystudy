@@ -3600,7 +3600,6 @@
         }
     });
 
-
 // These usually indicate a programmer mistake during development,
 // warn about them ASAP rather than swallowing them by default.
     var rerrorNames = /^(Eval|Internal|Range|Reference|Syntax|Type|URI)Error$/;
@@ -4365,8 +4364,7 @@
     }
 
     var documentElement = document.documentElement;
-    var
-        rtypenamespace = /^([^.]*)(?:\.(.+)|)/;
+    var rtypenamespace = /^([^.]*)(?:\.(.+)|)/;
 
     function returnTrue() {
         return true;
@@ -4374,15 +4372,6 @@
 
     function returnFalse() {
         return false;
-    }
-
-// Support: IE <=9 only
-// See #13393 for more info
-    function safeActiveElement() {
-        try {
-            return document.activeElement;
-        } catch (err) {
-        }
     }
 
     function on(elem, types, selector, data, fn, one) {
@@ -4776,27 +4765,6 @@
                 // Prevent triggered image.load events from bubbling to window.load
                 noBubble: true
             },
-            focus: {
-
-                // Fire native event if possible so blur/focus sequence is correct
-                trigger: function () {
-                    if (this !== safeActiveElement() && this.focus) {
-                        this.focus();
-                        return false;
-                    }
-                },
-                delegateType: "focusin"
-            },
-            blur: {
-                trigger: function () {
-                    if (this === safeActiveElement() && this.blur) {
-                        this.blur();
-                        return false;
-                    }
-                },
-                delegateType: "focusout"
-            },
-
             beforeunload: {
                 postDispatch: function (event) {
 
@@ -4950,186 +4918,6 @@
         }
     });
 
-    var
-        // See https://github.com/eslint/eslint/issues/3229
-        rxhtmlTag = /<(?!area|br|col|embed|hr|img|input|link|meta|param)(([a-z][^\/\0>\x20\t\r\n\f]*)[^>]*)\/>/gi,
-
-        /* eslint-enable */
-
-        // Support: IE <=10 - 11, Edge 12 - 13 only
-        // In IE/Edge using regex groups here causes severe slowdowns.
-        // See https://connect.microsoft.com/IE/feedback/details/1736512/
-        rnoInnerhtml = /<script|<style|<link/i,
-
-        // checked="checked" or checked
-        rchecked = /checked\s*(?:[^=]|=\s*.checked.)/i,
-        rcleanScript = /^\s*<!(?:\[CDATA\[|--)|(?:\]\]|--)>\s*$/g;
-
-// Prefer a tbody over its parent table for containing new rows
-    function manipulationTarget(elem, content) {
-        if (nodeName(elem, "table") &&
-            nodeName(content.nodeType !== 11 ? content : content.firstChild, "tr")) {
-
-            return jQuery(elem).children("tbody")[0] || elem;
-        }
-
-        return elem;
-    }
-
-// Replace/restore the type attribute of script elements for safe DOM manipulation
-    function disableScript(elem) {
-        elem.type = (elem.getAttribute("type") !== null) + "/" + elem.type;
-        return elem;
-    }
-
-    function restoreScript(elem) {
-        if ((elem.type || "").slice(0, 5) === "true/") {
-            elem.type = elem.type.slice(5);
-        } else {
-            elem.removeAttribute("type");
-        }
-
-        return elem;
-    }
-
-    function cloneCopyEvent(src, dest) {
-        var i, l, type, pdataOld, pdataCur, udataOld, udataCur, events;
-
-        if (dest.nodeType !== 1) {
-            return;
-        }
-
-        // 1. Copy private data: events, handlers, etc.
-        if (dataPriv.hasData(src)) {
-            pdataOld = dataPriv.access(src);
-            pdataCur = dataPriv.set(dest, pdataOld);
-            events = pdataOld.events;
-
-            if (events) {
-                delete pdataCur.handle;
-                pdataCur.events = {};
-
-                for (type in events) {
-                    for (i = 0, l = events[type].length; i < l; i++) {
-                        jQuery.event.add(dest, type, events[type][i]);
-                    }
-                }
-            }
-        }
-
-        // 2. Copy user data
-        if (dataUser.hasData(src)) {
-            udataOld = dataUser.access(src);
-            udataCur = jQuery.extend({}, udataOld);
-
-            dataUser.set(dest, udataCur);
-        }
-    }
-
-// Fix IE bugs, see support tests
-    function fixInput(src, dest) {
-        var nodeName = dest.nodeName.toLowerCase();
-
-        // Fails to persist the checked state of a cloned checkbox or radio button.
-        if (nodeName === "input" && rcheckableType.test(src.type)) {
-            dest.checked = src.checked;
-
-            // Fails to return the selected option to the default selected state when cloning options
-        } else if (nodeName === "input" || nodeName === "textarea") {
-            dest.defaultValue = src.defaultValue;
-        }
-    }
-
-    function domManip(collection, args, callback, ignored) {
-
-        // Flatten any nested arrays
-        args = concat.apply([], args);
-
-        var fragment, first, scripts, hasScripts, node, doc,
-            i = 0,
-            l = collection.length,
-            iNoClone = l - 1,
-            value = args[0],
-            valueIsFunction = isFunction(value);
-
-        // We can't cloneNode fragments that contain checked, in WebKit
-        if (valueIsFunction ||
-            (l > 1 && typeof value === "string" &&
-                !support.checkClone && rchecked.test(value))) {
-            return collection.each(function (index) {
-                var self = collection.eq(index);
-                if (valueIsFunction) {
-                    args[0] = value.call(this, index, self.html());
-                }
-                domManip(self, args, callback, ignored);
-            });
-        }
-
-        if (l) {
-            fragment = buildFragment(args, collection[0].ownerDocument, false, collection, ignored);
-            first = fragment.firstChild;
-
-            if (fragment.childNodes.length === 1) {
-                fragment = first;
-            }
-
-            // Require either new content or an interest in ignored elements to invoke the callback
-            if (first || ignored) {
-                scripts = jQuery.map(getAll(fragment, "script"), disableScript);
-                hasScripts = scripts.length;
-
-                // Use the original fragment for the last item
-                // instead of the first because it can end up
-                // being emptied incorrectly in certain situations (#8070).
-                for (; i < l; i++) {
-                    node = fragment;
-
-                    if (i !== iNoClone) {
-                        node = jQuery.clone(node, true, true);
-
-                        // Keep references to cloned scripts for later restoration
-                        if (hasScripts) {
-
-                            // Support: Android <=4.0 only, PhantomJS 1 only
-                            // push.apply(_, arraylike) throws on ancient WebKit
-                            jQuery.merge(scripts, getAll(node, "script"));
-                        }
-                    }
-
-                    callback.call(collection[i], node, i);
-                }
-
-                if (hasScripts) {
-                    doc = scripts[scripts.length - 1].ownerDocument;
-
-                    // Reenable scripts
-                    jQuery.map(scripts, restoreScript);
-
-                    // Evaluate executable scripts on first document insertion
-                    for (i = 0; i < hasScripts; i++) {
-                        node = scripts[i];
-                        if (rscriptType.test(node.type || "") &&
-                            !dataPriv.access(node, "globalEval") &&
-                            jQuery.contains(doc, node)) {
-
-                            if (node.src && (node.type || "").toLowerCase() !== "module") {
-
-                                // Optional AJAX dependency, but won't run scripts if not present
-                                if (jQuery._evalUrl) {
-                                    jQuery._evalUrl(node.src);
-                                }
-                            } else {
-                                DOMEval(node.textContent.replace(rcleanScript, ""), doc, node);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        return collection;
-    }
-
     function remove(elem, selector, keepData) {
         var node,
             nodes = selector ? jQuery.filter(selector, elem) : elem,
@@ -5152,52 +4940,6 @@
     }
 
     jQuery.extend({
-        htmlPrefilter: function (html) {
-            return html.replace(rxhtmlTag, "<$1></$2>");
-        },
-
-        clone: function (elem, dataAndEvents, deepDataAndEvents) {
-            var i, l, srcElements, destElements,
-                clone = elem.cloneNode(true),
-                inPage = jQuery.contains(elem.ownerDocument, elem);
-
-            // Fix IE cloning issues
-            if (!support.noCloneChecked && (elem.nodeType === 1 || elem.nodeType === 11) &&
-                !jQuery.isXMLDoc(elem)) {
-
-                // We eschew Sizzle here for performance reasons: https://jsperf.com/getall-vs-sizzle/2
-                destElements = getAll(clone);
-                srcElements = getAll(elem);
-
-                for (i = 0, l = srcElements.length; i < l; i++) {
-                    fixInput(srcElements[i], destElements[i]);
-                }
-            }
-
-            // Copy the events from the original to the clone
-            if (dataAndEvents) {
-                if (deepDataAndEvents) {
-                    srcElements = srcElements || getAll(elem);
-                    destElements = destElements || getAll(clone);
-
-                    for (i = 0, l = srcElements.length; i < l; i++) {
-                        cloneCopyEvent(srcElements[i], destElements[i]);
-                    }
-                } else {
-                    cloneCopyEvent(elem, clone);
-                }
-            }
-
-            // Preserve script evaluation history
-            destElements = getAll(clone, "script");
-            if (destElements.length > 0) {
-                setGlobalEval(destElements, !inPage && getAll(elem, "script"));
-            }
-
-            // Return the cloned set
-            return clone;
-        },
-
         cleanData: function (elems) {
             var data, elem, type,
                 special = jQuery.event.special,
@@ -5234,116 +4976,9 @@
     });
 
     jQuery.fn.extend({
-
         remove: function (selector) {
             return remove(this, selector);
-        },
-
-        text: function (value) {
-            return access(this, function (value) {
-                return value === undefined ?
-                    jQuery.text(this) :
-                    this.empty().each(function () {
-                        if (this.nodeType === 1 || this.nodeType === 11 || this.nodeType === 9) {
-                            this.textContent = value;
-                        }
-                    });
-            }, null, value, arguments.length);
-        },
-
-        prepend: function () {
-            return domManip(this, arguments, function (elem) {
-                if (this.nodeType === 1 || this.nodeType === 11 || this.nodeType === 9) {
-                    var target = manipulationTarget(this, elem);
-                    target.insertBefore(elem, target.firstChild);
-                }
-            });
-        },
-
-        html: function (value) {
-            return access(this, function (value) {
-                var elem = this[0] || {},
-                    i = 0,
-                    l = this.length;
-
-                if (value === undefined && elem.nodeType === 1) {
-                    return elem.innerHTML;
-                }
-
-                // See if we can take a shortcut and just use innerHTML
-                if (typeof value === "string" && !rnoInnerhtml.test(value) &&
-                    !wrapMap[(rtagName.exec(value) || ["", ""])[1].toLowerCase()]) {
-
-                    value = jQuery.htmlPrefilter(value);
-
-                    try {
-                        for (; i < l; i++) {
-                            elem = this[i] || {};
-
-                            // Remove element nodes and prevent memory leaks
-                            if (elem.nodeType === 1) {
-                                jQuery.cleanData(getAll(elem, false));
-                                elem.innerHTML = value;
-                            }
-                        }
-
-                        elem = 0;
-
-                        // If using innerHTML throws an exception, use the fallback method
-                    } catch (e) {
-                    }
-                }
-
-                if (elem) {
-                    this.empty().append(value);
-                }
-            }, null, value, arguments.length);
-        },
-
-        replaceWith: function () {
-            var ignored = [];
-
-            // Make the changes, replacing each non-ignored context element with the new content
-            return domManip(this, arguments, function (elem) {
-                var parent = this.parentNode;
-
-                if (jQuery.inArray(this, ignored) < 0) {
-                    jQuery.cleanData(getAll(this));
-                    if (parent) {
-                        parent.replaceChild(elem, this);
-                    }
-                }
-
-                // Force callback invocation
-            }, ignored);
         }
-    });
-
-    jQuery.each({
-        appendTo: "append",
-        prependTo: "prepend",
-        insertBefore: "before",
-        insertAfter: "after",
-        replaceAll: "replaceWith"
-    }, function (name, original) {
-        jQuery.fn[name] = function (selector) {
-            var elems,
-                ret = [],
-                insert = jQuery(selector),
-                last = insert.length - 1,
-                i = 0;
-
-            for (; i <= last; i++) {
-                elems = i === last ? this : this.clone(true);
-                jQuery(insert[i])[original](elems);
-
-                // Support: Android <=4.0 only, PhantomJS 1 only
-                // .get() because push.apply(_, arraylike) throws on ancient WebKit
-                push.apply(ret, elems.get());
-            }
-
-            return this.pushStack(ret);
-        };
     });
 
     function Tween(elem, options, prop, end, easing) {
@@ -5637,7 +5272,6 @@
         // Default speed
         _default: 400
     };
-
 
 // Based off of the plugin by Clint Helfers, with permission.
 // https://web.archive.org/web/20100324014747/http://blindsignals.com/index.php/2009/07/jquery-delay/
@@ -5975,97 +5609,6 @@
                     this.value = val;
                 }
             });
-        }
-    });
-
-    jQuery.extend({
-        valHooks: {
-            option: {
-                get: function (elem) {
-
-                    var val = jQuery.find.attr(elem, "value");
-                    return val != null ?
-                        val :
-
-                        // Support: IE <=10 - 11 only
-                        // option.text throws exceptions (#14686, #14858)
-                        // Strip and collapse whitespace
-                        // https://html.spec.whatwg.org/#strip-and-collapse-whitespace
-                        stripAndCollapse(jQuery.text(elem));
-                }
-            },
-            select: {
-                get: function (elem) {
-                    var value, option, i,
-                        options = elem.options,
-                        index = elem.selectedIndex,
-                        one = elem.type === "select-one",
-                        values = one ? null : [],
-                        max = one ? index + 1 : options.length;
-
-                    if (index < 0) {
-                        i = max;
-
-                    } else {
-                        i = one ? index : 0;
-                    }
-
-                    // Loop through all the selected options
-                    for (; i < max; i++) {
-                        option = options[i];
-
-                        // Support: IE <=9 only
-                        // IE8-9 doesn't update selected after form reset (#2551)
-                        if ((option.selected || i === index) &&
-
-                            // Don't return options that are disabled or in a disabled optgroup
-                            !option.disabled &&
-                            (!option.parentNode.disabled ||
-                                !nodeName(option.parentNode, "optgroup"))) {
-
-                            // Get the specific value for the option
-                            value = jQuery(option).val();
-
-                            // We don't need an array for one selects
-                            if (one) {
-                                return value;
-                            }
-
-                            // Multi-Selects return an array
-                            values.push(value);
-                        }
-                    }
-
-                    return values;
-                },
-
-                set: function (elem, value) {
-                    var optionSet, option,
-                        options = elem.options,
-                        values = jQuery.makeArray(value),
-                        i = options.length;
-
-                    while (i--) {
-                        option = options[i];
-
-                        /* eslint-disable no-cond-assign */
-
-                        if (option.selected =
-                                jQuery.inArray(jQuery.valHooks.option.get(option), values) > -1
-                        ) {
-                            optionSet = true;
-                        }
-
-                        /* eslint-enable no-cond-assign */
-                    }
-
-                    // Force browsers to behave consistently when non-matching value is set
-                    if (!optionSet) {
-                        elem.selectedIndex = -1;
-                    }
-                    return values;
-                }
-            }
         }
     });
 
