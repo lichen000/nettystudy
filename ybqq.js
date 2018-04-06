@@ -2882,10 +2882,6 @@
         }
     });
 
-
-// Initialize a jQuery object
-
-
 // A central reference to the root jQuery(document)
     var rootjQuery,
 
@@ -3000,7 +2996,6 @@
 // Initialize central reference
     rootjQuery = jQuery(document);
 
-
     var rparentsprev = /^(?:parents|prev(?:Until|All))/,
 
         // Methods guaranteed to produce a unique set when starting from a unique set
@@ -3024,36 +3019,6 @@
                     }
                 }
             });
-        },
-
-        closest: function (selectors, context) {
-            var cur,
-                i = 0,
-                l = this.length,
-                matched = [],
-                targets = typeof selectors !== "string" && jQuery(selectors);
-
-            // Positional selectors never match, since there's no _selection_ context
-            if (!rneedsContext.test(selectors)) {
-                for (; i < l; i++) {
-                    for (cur = this[i]; cur && cur !== context; cur = cur.parentNode) {
-
-                        // Always skip document fragments
-                        if (cur.nodeType < 11 && (targets ?
-                                targets.index(cur) > -1 :
-
-                                // Don't pass non-elements to Sizzle
-                                cur.nodeType === 1 &&
-                                jQuery.find.matchesSelector(cur, selectors))) {
-
-                            matched.push(cur);
-                            break;
-                        }
-                    }
-                }
-            }
-
-            return this.pushStack(matched.length > 1 ? jQuery.uniqueSort(matched) : matched);
         },
 
         // Determine the position of an element within the set
@@ -3084,12 +3049,6 @@
                 )
             );
         },
-
-        addBack: function (selector) {
-            return this.add(selector == null ?
-                this.prevObject : this.prevObject.filter(selector)
-            );
-        }
     });
 
     function sibling(cur, dir) {
@@ -3103,32 +3062,14 @@
             var parent = elem.parentNode;
             return parent && parent.nodeType !== 11 ? parent : null;
         },
-        parents: function (elem) {
-            return dir(elem, "parentNode");
-        },
-        parentsUntil: function (elem, i, until) {
-            return dir(elem, "parentNode", until);
-        },
         next: function (elem) {
             return sibling(elem, "nextSibling");
         },
         prev: function (elem) {
             return sibling(elem, "previousSibling");
         },
-        nextAll: function (elem) {
-            return dir(elem, "nextSibling");
-        },
         prevAll: function (elem) {
             return dir(elem, "previousSibling");
-        },
-        nextUntil: function (elem, i, until) {
-            return dir(elem, "nextSibling", until);
-        },
-        prevUntil: function (elem, i, until) {
-            return dir(elem, "previousSibling", until);
-        },
-        siblings: function (elem) {
-            return siblings((elem.parentNode || {}).firstChild, elem);
         },
         children: function (elem) {
             return siblings(elem.firstChild);
@@ -4212,16 +4153,6 @@
         removeData: function (elem, name) {
             dataUser.remove(elem, name);
         },
-
-        // TODO: Now that all calls to _data and _removeData have been replaced
-        // with direct calls to dataPriv methods, these can be deprecated.
-        _data: function (elem, name, data) {
-            return dataPriv.access(elem, name, data);
-        },
-
-        _removeData: function (elem, name) {
-            dataPriv.remove(elem, name);
-        }
     });
 
     jQuery.fn.extend({
@@ -4406,9 +4337,6 @@
                 jQuery.dequeue(this, type);
             });
         },
-        clearQueue: function (type) {
-            return this.queue(type || "fx", []);
-        },
 
         // Get a promise resolved when queues of a certain type
         // are emptied (fx is the type by default)
@@ -4443,31 +4371,9 @@
     });
     var pnum = (/[+-]?(?:\d*\.|)\d+(?:[eE][+-]?\d+|)/).source;
 
-    var rcssNum = new RegExp("^(?:([+-])=|)(" + pnum + ")([a-z%]*)$", "i");
-
-    var isHiddenWithinTree = function (elem, el) {
-
-        // isHiddenWithinTree might be called from jQuery#filter function;
-        // in that case, element will be second argument
-        elem = el || elem;
-
-        // Inline style trumps all
-        return elem.style.display === "none" ||
-            elem.style.display === "" &&
-
-            // Otherwise, check computed style
-            // Support: Firefox <=43 - 45
-            // Disconnected elements can have computed display: none, so first confirm that elem is
-            // in the document.
-            jQuery.contains(elem.ownerDocument, elem) &&
-
-            jQuery.css(elem, "display") === "none";
-    };
-
     var rtagName = (/<([a-z][^\/\0>\x20\t\r\n\f]+)/i);
 
     var rscriptType = (/^$|^module$|\/(?:java|ecma)script/i);
-
 
     function getAll(context, tag) {
 
@@ -5088,21 +4994,6 @@
                 },
                 delegateType: "focusout"
             },
-            click: {
-
-                // For checkbox, fire native event so checked state will be right
-                trigger: function () {
-                    if (this.type === "checkbox" && this.click && nodeName(this, "input")) {
-                        this.click();
-                        return false;
-                    }
-                },
-
-                // For cross-browser consistency, don't fire native .click() on links
-                _default: function (event) {
-                    return nodeName(event.target, "a");
-                }
-            },
 
             beforeunload: {
                 postDispatch: function (event) {
@@ -5275,49 +5166,10 @@
         }
     }, jQuery.event.addProp);
 
-// Create mouseenter/leave events using mouseover/out and event-time checks
-// so that event delegation works in jQuery.
-// Do the same for pointerenter/pointerleave and pointerover/pointerout
-//
-// Support: Safari 7 only
-// Safari sends mouseenter too often; see:
-// https://bugs.chromium.org/p/chromium/issues/detail?id=470258
-// for the description of the bug (it existed in older Chrome versions as well).
-    jQuery.each({
-        mouseenter: "mouseover",
-        mouseleave: "mouseout",
-        pointerenter: "pointerover",
-        pointerleave: "pointerout"
-    }, function (orig, fix) {
-        jQuery.event.special[orig] = {
-            delegateType: fix,
-            bindType: fix,
-
-            handle: function (event) {
-                var ret,
-                    target = this,
-                    related = event.relatedTarget,
-                    handleObj = event.handleObj;
-
-                // For mouseenter/leave call the handler if related is outside the target.
-                // NB: No relatedTarget if the mouse left/entered the browser window
-                if (!related || (related !== target && !jQuery.contains(target, related))) {
-                    event.type = handleObj.origType;
-                    ret = handleObj.handler.apply(this, arguments);
-                    event.type = fix;
-                }
-                return ret;
-            }
-        };
-    });
-
     jQuery.fn.extend({
 
         on: function (types, selector, data, fn) {
             return on(this, types, selector, data, fn);
-        },
-        one: function (types, selector, data, fn) {
-            return on(this, types, selector, data, fn, 1);
         },
         off: function (types, selector, fn) {
             var handleObj, type;
@@ -5891,69 +5743,12 @@
         support.clearCloneStyle = div.style.backgroundClip === "content-box";
 
         jQuery.extend(support, {
-            boxSizingReliable: function () {
-                computeStyleTests();
-                return boxSizingReliableVal;
-            },
             pixelBoxStyles: function () {
                 computeStyleTests();
                 return pixelBoxStylesVal;
             }
         });
     })();
-
-
-    function curCSS(elem, name, computed) {
-        var width, minWidth, maxWidth, ret,
-
-            // Support: Firefox 51+
-            // Retrieving style before computed somehow
-            // fixes an issue with getting wrong values
-            // on detached elements
-            style = elem.style;
-
-        computed = computed || getStyles(elem);
-
-        // getPropertyValue is needed for:
-        //   .css('filter') (IE 9 only, #12537)
-        //   .css('--customProperty) (#3144)
-        if (computed) {
-            ret = computed.getPropertyValue(name) || computed[name];
-
-            if (ret === "" && !jQuery.contains(elem.ownerDocument, elem)) {
-                ret = jQuery.style(elem, name);
-            }
-
-            // A tribute to the "awesome hack by Dean Edwards"
-            // Android Browser returns percentage for some values,
-            // but width seems to be reliably pixels.
-            // This is against the CSSOM draft spec:
-            // https://drafts.csswg.org/cssom/#resolved-values
-            if (!support.pixelBoxStyles() && rnumnonpx.test(ret) && rboxStyle.test(name)) {
-
-                // Remember the original values
-                width = style.width;
-                minWidth = style.minWidth;
-                maxWidth = style.maxWidth;
-
-                // Put in the new values to get a computed value out
-                style.minWidth = style.maxWidth = style.width = ret;
-                ret = computed.width;
-
-                // Revert the changed values
-                style.width = width;
-                style.minWidth = minWidth;
-                style.maxWidth = maxWidth;
-            }
-        }
-
-        return ret !== undefined ?
-
-            // Support: IE <=9 - 11 only
-            // IE returns zIndex value as an integer.
-            ret + "" :
-            ret;
-    }
 
     var
 
@@ -5964,95 +5759,6 @@
 
         cssPrefixes = ["Webkit", "Moz", "ms"],
         emptyStyle = document.createElement("div").style;
-
-// Return a css property mapped to a potentially vendor prefixed property
-    function vendorPropName(name) {
-
-        // Shortcut for names that are not vendor prefixed
-        if (name in emptyStyle) {
-            return name;
-        }
-
-        // Check for vendor prefixed names
-        var capName = name[0].toUpperCase() + name.slice(1),
-            i = cssPrefixes.length;
-
-        while (i--) {
-            name = cssPrefixes[i] + capName;
-            if (name in emptyStyle) {
-                return name;
-            }
-        }
-    }
-
-// Return a property mapped along what jQuery.cssProps suggests or to
-// a vendor prefixed property.
-
-
-    function boxModelAdjustment(elem, dimension, box, isBorderBox, styles, computedVal) {
-        var i = dimension === "width" ? 1 : 0,
-            extra = 0,
-            delta = 0;
-
-        // Adjustment may not be necessary
-        if (box === (isBorderBox ? "border" : "content")) {
-            return 0;
-        }
-
-        for (; i < 4; i += 2) {
-
-            // Both box models exclude margin
-            if (box === "margin") {
-                delta += jQuery.css(elem, box + cssExpand[i], true, styles);
-            }
-
-            // If we get here with a content-box, we're seeking "padding" or "border" or "margin"
-            if (!isBorderBox) {
-
-                // Add padding
-                delta += jQuery.css(elem, "padding" + cssExpand[i], true, styles);
-
-                // For "border" or "margin", add border
-                if (box !== "padding") {
-                    delta += jQuery.css(elem, "border" + cssExpand[i] + "Width", true, styles);
-
-                    // But still keep track of it otherwise
-                } else {
-                    extra += jQuery.css(elem, "border" + cssExpand[i] + "Width", true, styles);
-                }
-
-                // If we get here with a border-box (content + padding + border), we're seeking "content" or
-                // "padding" or "margin"
-            } else {
-
-                // For "content", subtract padding
-                if (box === "content") {
-                    delta -= jQuery.css(elem, "padding" + cssExpand[i], true, styles);
-                }
-
-                // For "content" or "padding", subtract border
-                if (box !== "margin") {
-                    delta -= jQuery.css(elem, "border" + cssExpand[i] + "Width", true, styles);
-                }
-            }
-        }
-
-        // Account for positive content-box scroll gutter when requested by providing computedVal
-        if (!isBorderBox && computedVal >= 0) {
-
-            // offsetWidth/offsetHeight is a rounded sum of content, padding, scroll gutter, and border
-            // Assuming integer scroll gutter, subtract the rest and round down
-            delta += Math.max(0, Math.ceil(
-                elem["offset" + dimension[0].toUpperCase() + dimension.slice(1)] -
-                computedVal -
-                delta -
-                extra -
-                0.5
-            ));
-        }
-
-        return delta;
-    }
 
     function Tween(elem, options, prop, end, easing) {
         return new Tween.prototype.init(elem, options, prop, end, easing);
