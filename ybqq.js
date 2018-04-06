@@ -1,14 +1,7 @@
 /*!
  * jQuery JavaScript Library v3.3.1
- * https://jquery.com/
- *
- * Includes Sizzle.js
- * https://sizzlejs.com/
- *
  * Copyright JS Foundation and other contributors
  * Released under the MIT license
- * https://jquery.org/license
- *
  * Date: 2018-01-20T17:24Z
  */
 (function (global, factory) {
@@ -122,8 +115,6 @@
     /* global Symbol */
 // Defining this global in .eslintrc.json would create a danger of using the global
 // unguarded in another place, it seems safer to define global only for this module
-
-
     var
         version = "3.3.1",
 
@@ -133,11 +124,7 @@
             // The jQuery object is actually just the init constructor 'enhanced'
             // Need init if jQuery is called (just allow error to be thrown if not included)
             return new jQuery.fn.init(selector, context);
-        },
-
-        // Support: Android <=4.0 only
-        // Make sure we trim BOM and NBSP
-        rtrim = /^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g;
+        };
 
     jQuery.fn = jQuery.prototype = {
 
@@ -1602,8 +1589,6 @@
                 // Can be adjusted by the user
                 cacheLength: 50,
 
-                createPseudo: markFunction,
-
                 match: matchExpr,
 
                 attrHandle: {},
@@ -1797,7 +1782,6 @@
 
                                         cache = uniqueCache[type] || [];
                                         nodeIndex = cache[0] === dirruns && cache[1];
-                                        diff = nodeIndex && cache[2];
                                         node = nodeIndex && parent.childNodes[nodeIndex];
 
                                         while ((node = ++nodeIndex && node && node[dir] ||
@@ -2771,7 +2755,6 @@
         return matched;
     };
 
-
     var siblings = function (n, elem) {
         var matched = [];
 
@@ -2787,14 +2770,13 @@
 
     var rneedsContext = jQuery.expr.match.needsContext;
 
-
     function nodeName(elem, name) {
 
         return elem.nodeName && elem.nodeName.toLowerCase() === name.toLowerCase();
 
-    };
-    var rsingleTag = (/^<([a-z][^\/\0>:\x20\t\r\n\f]*)[\x20\t\r\n\f]*\/?>(?:<\/\1>|)$/i);
+    }
 
+    var rsingleTag = (/^<([a-z][^\/\0>:\x20\t\r\n\f]*)[\x20\t\r\n\f]*\/?>(?:<\/\1>|)$/i);
 
 // Implement the identical functionality for filter and not
     function winnow(elements, qualifier, not) {
@@ -5661,25 +5643,6 @@
         };
     });
 
-    (function () {
-
-
-        var
-            div = document.createElement("div");
-
-        // Finish early in limited (non-browser) environments
-        if (!div.style) {
-            return;
-        }
-
-        // Support: IE <=9 - 11 only
-        // Style of cloned element affects source element cloned (#8908)
-        div.style.backgroundClip = "content-box";
-        div.cloneNode(true).style.backgroundClip = "";
-        support.clearCloneStyle = div.style.backgroundClip === "content-box";
-
-    })();
-
     function Tween(elem, options, prop, end, easing) {
         return new Tween.prototype.init(elem, options, prop, end, easing);
     }
@@ -5695,7 +5658,7 @@
             this.options = options;
             this.start = this.now = this.cur();
             this.end = end;
-            this.unit = unit || (jQuery.cssNumber[prop] ? "" : "px");
+            this.unit = unit || "px";
         },
         cur: function () {
             var hooks = Tween.propHooks[this.prop];
@@ -5768,7 +5731,6 @@
 
 // Back compat <1.8 extension point
     jQuery.fx.step = {};
-
 
     var
         fxNow, inProgress,
@@ -5990,31 +5952,6 @@
             };
         });
     };
-
-
-    (function () {
-        var input = document.createElement("input"),
-            select = document.createElement("select"),
-            opt = select.appendChild(document.createElement("option"));
-
-        input.type = "checkbox";
-
-        // Support: Android <=4.3 only
-        // Default value for a checkbox should be "on"
-        support.checkOn = input.value !== "";
-
-        // Support: IE <=11 only
-        // Must access selectedIndex to make default options select
-        support.optSelected = opt.selected;
-
-        // Support: IE <=11 only
-        // An input loses its value after becoming a radio
-        input = document.createElement("input");
-        input.value = "t";
-        input.type = "radio";
-        support.radioValue = input.value === "t";
-    })();
-
 
     var boolHook,
         attrHandle = jQuery.expr.attrHandle;
@@ -6267,10 +6204,6 @@
         "tabIndex",
         "readOnly",
         "maxLength",
-        "cellSpacing",
-        "cellPadding",
-        "rowSpan",
-        "colSpan",
         "useMap",
         "frameBorder",
         "contentEditable"
@@ -6286,7 +6219,6 @@
         return tokens.join(" ");
     }
 
-
     function getClass(elem) {
         return elem.getAttribute && elem.getAttribute("class") || "";
     }
@@ -6300,167 +6232,6 @@
         }
         return [];
     }
-
-    jQuery.fn.extend({
-        addClass: function (value) {
-            var classes, elem, cur, curValue, clazz, j, finalValue,
-                i = 0;
-
-            if (isFunction(value)) {
-                return this.each(function (j) {
-                    jQuery(this).addClass(value.call(this, j, getClass(this)));
-                });
-            }
-
-            classes = classesToArray(value);
-
-            if (classes.length) {
-                while ((elem = this[i++])) {
-                    curValue = getClass(elem);
-                    cur = elem.nodeType === 1 && (" " + stripAndCollapse(curValue) + " ");
-
-                    if (cur) {
-                        j = 0;
-                        while ((clazz = classes[j++])) {
-                            if (cur.indexOf(" " + clazz + " ") < 0) {
-                                cur += clazz + " ";
-                            }
-                        }
-
-                        // Only assign if different to avoid unneeded rendering.
-                        finalValue = stripAndCollapse(cur);
-                        if (curValue !== finalValue) {
-                            elem.setAttribute("class", finalValue);
-                        }
-                    }
-                }
-            }
-
-            return this;
-        },
-
-        removeClass: function (value) {
-            var classes, elem, cur, curValue, clazz, j, finalValue,
-                i = 0;
-
-            if (isFunction(value)) {
-                return this.each(function (j) {
-                    jQuery(this).removeClass(value.call(this, j, getClass(this)));
-                });
-            }
-
-            if (!arguments.length) {
-                return this.attr("class", "");
-            }
-
-            classes = classesToArray(value);
-
-            if (classes.length) {
-                while ((elem = this[i++])) {
-                    curValue = getClass(elem);
-
-                    // This expression is here for better compressibility (see addClass)
-                    cur = elem.nodeType === 1 && (" " + stripAndCollapse(curValue) + " ");
-
-                    if (cur) {
-                        j = 0;
-                        while ((clazz = classes[j++])) {
-
-                            // Remove *all* instances
-                            while (cur.indexOf(" " + clazz + " ") > -1) {
-                                cur = cur.replace(" " + clazz + " ", " ");
-                            }
-                        }
-
-                        // Only assign if different to avoid unneeded rendering.
-                        finalValue = stripAndCollapse(cur);
-                        if (curValue !== finalValue) {
-                            elem.setAttribute("class", finalValue);
-                        }
-                    }
-                }
-            }
-
-            return this;
-        },
-
-        toggleClass: function (value, stateVal) {
-            var type = typeof value,
-                isValidValue = type === "string" || Array.isArray(value);
-
-            if (typeof stateVal === "boolean" && isValidValue) {
-                return stateVal ? this.addClass(value) : this.removeClass(value);
-            }
-
-            if (isFunction(value)) {
-                return this.each(function (i) {
-                    jQuery(this).toggleClass(
-                        value.call(this, i, getClass(this), stateVal),
-                        stateVal
-                    );
-                });
-            }
-
-            return this.each(function () {
-                var className, i, self, classNames;
-
-                if (isValidValue) {
-
-                    // Toggle individual class names
-                    i = 0;
-                    self = jQuery(this);
-                    classNames = classesToArray(value);
-
-                    while ((className = classNames[i++])) {
-
-                        // Check each className given, space separated list
-                        if (self.hasClass(className)) {
-                            self.removeClass(className);
-                        } else {
-                            self.addClass(className);
-                        }
-                    }
-
-                    // Toggle whole class name
-                } else if (value === undefined || type === "boolean") {
-                    className = getClass(this);
-                    if (className) {
-
-                        // Store className if set
-                        dataPriv.set(this, "__className__", className);
-                    }
-
-                    // If the element has a class name or if we're passed `false`,
-                    // then remove the whole classname (if there was one, the above saved it).
-                    // Otherwise bring back whatever was previously saved (if anything),
-                    // falling back to the empty string if nothing was stored.
-                    if (this.setAttribute) {
-                        this.setAttribute("class",
-                            className || value === false ?
-                                "" :
-                                dataPriv.get(this, "__className__") || ""
-                        );
-                    }
-                }
-            });
-        },
-
-        hasClass: function (selector) {
-            var className, elem,
-                i = 0;
-
-            className = " " + selector + " ";
-            while ((elem = this[i++])) {
-                if (elem.nodeType === 1 &&
-                    (" " + stripAndCollapse(getClass(elem)) + " ").indexOf(className) > -1) {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-    });
-
 
     var rreturn = /\r/g;
 
@@ -6625,7 +6396,6 @@
     });
 
     support.focusin = "onfocusin" in window;
-
 
     var rfocusMorph = /^(?:focusinfocus|focusoutblur)$/,
         stopPropagationCallback = function (e) {
