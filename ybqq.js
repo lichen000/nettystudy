@@ -473,8 +473,7 @@
  */
         (function (window) {
 
-            var i,
-                support,
+            var support,
                 Expr,
                 getText,
                 isXML,
@@ -900,28 +899,6 @@
                 }
 
                 return a ? 1 : -1;
-            }
-
-            /**
-             * Returns a function to use in pseudos for input types
-             * @param {String} type
-             */
-            function createInputPseudo(type) {
-                return function (elem) {
-                    var name = elem.nodeName.toLowerCase();
-                    return name === "input" && elem.type === type;
-                };
-            }
-
-            /**
-             * Returns a function to use in pseudos for buttons
-             * @param {String} type
-             */
-            function createButtonPseudo(type) {
-                return function (elem) {
-                    var name = elem.nodeName.toLowerCase();
-                    return (name === "input" || name === "button") && elem.type === type;
-                };
             }
 
             /**
@@ -1964,30 +1941,9 @@
                         return elem === docElem;
                     },
 
-                    "focus": function (elem) {
-                        return elem === document.activeElement && (!document.hasFocus || document.hasFocus()) && !!(elem.type || elem.href || ~elem.tabIndex);
-                    },
-
                     // Boolean properties
                     "enabled": createDisabledPseudo(false),
                     "disabled": createDisabledPseudo(true),
-
-                    "checked": function (elem) {
-                        // In CSS3, :checked should return both checked and selected elements
-                        // http://www.w3.org/TR/2011/REC-css3-selectors-20110929/#checked
-                        var nodeName = elem.nodeName.toLowerCase();
-                        return (nodeName === "input" && !!elem.checked) || (nodeName === "option" && !!elem.selected);
-                    },
-
-                    "selected": function (elem) {
-                        // Accessing this property makes selected-by-default
-                        // options in Safari work properly
-                        if (elem.parentNode) {
-                            elem.parentNode.selectedIndex;
-                        }
-
-                        return elem.selected === true;
-                    },
 
                     // Contents
                     "empty": function (elem) {
@@ -2010,25 +1966,6 @@
                     // Element/input types
                     "header": function (elem) {
                         return rheader.test(elem.nodeName);
-                    },
-
-                    "input": function (elem) {
-                        return rinputs.test(elem.nodeName);
-                    },
-
-                    "button": function (elem) {
-                        var name = elem.nodeName.toLowerCase();
-                        return name === "input" && elem.type === "button" || name === "button";
-                    },
-
-                    "text": function (elem) {
-                        var attr;
-                        return elem.nodeName.toLowerCase() === "input" &&
-                            elem.type === "text" &&
-
-                            // Support: IE<8
-                            // New HTML5 attribute values (e.g., "search") appear with elem.type === "text"
-                            ((attr = elem.getAttribute("type")) == null || attr.toLowerCase() === "text");
                     },
 
                     // Position-in-collection
@@ -2079,14 +2016,6 @@
             };
 
             Expr.pseudos["nth"] = Expr.pseudos["eq"];
-
-// Add button/input type pseudos
-            for (i in {radio: true, checkbox: true, file: true, password: true, image: true}) {
-                Expr.pseudos[i] = createInputPseudo(i);
-            }
-            for (i in {submit: true, reset: true}) {
-                Expr.pseudos[i] = createButtonPseudo(i);
-            }
 
 // Easy API for creating new setFilters
             function setFilters() {
@@ -2720,11 +2649,7 @@
 
     jQuery.find = Sizzle;
     jQuery.expr = Sizzle.selectors;
-
-// Deprecated
-    jQuery.expr[":"] = jQuery.expr.pseudos;
-    jQuery.uniqueSort = jQuery.unique = Sizzle.uniqueSort;
-    jQuery.text = Sizzle.getText;
+    jQuery.uniqueSort = Sizzle.uniqueSort;
     jQuery.isXMLDoc = Sizzle.isXML;
 
     function nodeName(elem, name) {
@@ -2901,7 +2826,6 @@
         };
     });
     var rnothtmlwhite = (/[^\x20\t\r\n\f]+/g);
-
 
 // Convert String-formatted options into Object-formatted ones
     function createOptions(options) {
@@ -3317,7 +3241,6 @@
 
                         return jQuery.Deferred(function (newDefer) {
 
-                            // progress_handlers.add( ... )
                             tuples[0][3].add(
                                 resolve(
                                     0,
@@ -3329,7 +3252,6 @@
                                 )
                             );
 
-                            // fulfilled_handlers.add( ... )
                             tuples[1][3].add(
                                 resolve(
                                     0,
@@ -3373,30 +3295,19 @@
                     list.add(
                         function () {
 
-                            // state = "resolved" (i.e., fulfilled)
-                            // state = "rejected"
                             state = stateString;
                         },
 
-                        // rejected_callbacks.disable
-                        // fulfilled_callbacks.disable
                         tuples[3 - i][2].disable,
 
-                        // rejected_handlers.disable
-                        // fulfilled_handlers.disable
                         tuples[3 - i][3].disable,
 
-                        // progress_callbacks.lock
                         tuples[0][2].lock,
 
-                        // progress_handlers.lock
                         tuples[0][3].lock
                     );
                 }
 
-                // progress_handlers.fire
-                // fulfilled_handlers.fire
-                // rejected_handlers.fire
                 list.add(tuple[3].fire);
 
                 deferred[tuple[0]] = function () {
@@ -3422,7 +3333,6 @@
         // Deferred helper
         when: function (singleValue) {
             var
-
                 // count of uncompleted subordinates
                 remaining = arguments.length,
 
@@ -3482,13 +3392,11 @@
         }
     };
 
-
     jQuery.readyException = function (error) {
         window.setTimeout(function () {
             throw error;
         });
     };
-
 
 // The deferred used on DOM ready
     var readyList = jQuery.Deferred();
@@ -3565,7 +3473,6 @@
         // A fallback to window.onload, that will always work
         window.addEventListener("load", completed);
     }
-
 
 // Multifunctional method to get and set values of a collection
 // The value/s can optionally be executed if it's a function
