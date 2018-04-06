@@ -5660,75 +5660,11 @@
             return this.pushStack(ret);
         };
     });
-    var rnumnonpx = new RegExp("^(" + pnum + ")(?!px)[a-z%]+$", "i");
-
-    var getStyles = function (elem) {
-
-        // Support: IE <=11 only, Firefox <=30 (#15098, #14150)
-        // IE throws on elements created in popups
-        // FF meanwhile throws on frame elements through "defaultView.getComputedStyle"
-        var view = elem.ownerDocument.defaultView;
-
-        if (!view || !view.opener) {
-            view = window;
-        }
-
-        return view.getComputedStyle(elem);
-    };
 
     (function () {
 
-        // Executing both pixelPosition & boxSizingReliable tests require only one layout
-        // so they're executed at the same time to save the second computation.
-        function computeStyleTests() {
 
-            // This is a singleton, we need to execute it only once
-            if (!div) {
-                return;
-            }
-
-            container.style.cssText = "position:absolute;left:-11111px;width:60px;" +
-                "margin-top:1px;padding:0;border:0";
-            div.style.cssText =
-                "position:relative;display:block;box-sizing:border-box;overflow:scroll;" +
-                "margin:auto;border:1px;padding:1px;" +
-                "width:60%;top:1%";
-            documentElement.appendChild(container).appendChild(div);
-
-            var divStyle = window.getComputedStyle(div);
-            pixelPositionVal = divStyle.top !== "1%";
-
-            // Support: Android 4.0 - 4.3 only, Firefox <=3 - 44
-            reliableMarginLeftVal = roundPixelMeasures(divStyle.marginLeft) === 12;
-
-            // Support: Android 4.0 - 4.3 only, Safari <=9.1 - 10.1, iOS <=7.0 - 9.3
-            // Some styles come back with percentage values, even though they shouldn't
-            div.style.right = "60%";
-            pixelBoxStylesVal = roundPixelMeasures(divStyle.right) === 36;
-
-            // Support: IE 9 - 11 only
-            // Detect misreporting of content dimensions for box-sizing:border-box elements
-            boxSizingReliableVal = roundPixelMeasures(divStyle.width) === 36;
-
-            // Support: IE 9 only
-            // Detect overflow:scroll screwiness (gh-3699)
-            div.style.position = "absolute";
-            scrollboxSizeVal = div.offsetWidth === 36 || "absolute";
-
-            documentElement.removeChild(container);
-
-            // Nullify the div so it wouldn't be stored in the memory and
-            // it will also be a sign that checks already performed
-            div = null;
-        }
-
-        function roundPixelMeasures(measure) {
-            return Math.round(parseFloat(measure));
-        }
-
-        var pixelPositionVal, boxSizingReliableVal, scrollboxSizeVal, pixelBoxStylesVal,
-            reliableMarginLeftVal,
-            container = document.createElement("div"),
+        var
             div = document.createElement("div");
 
         // Finish early in limited (non-browser) environments
@@ -5742,23 +5678,7 @@
         div.cloneNode(true).style.backgroundClip = "";
         support.clearCloneStyle = div.style.backgroundClip === "content-box";
 
-        jQuery.extend(support, {
-            pixelBoxStyles: function () {
-                computeStyleTests();
-                return pixelBoxStylesVal;
-            }
-        });
     })();
-
-    var
-
-        // Swappable if display is none or starts with table
-        // except "table", "table-cell", or "table-caption"
-        // See here for display values: https://developer.mozilla.org/en-US/docs/CSS/display
-
-
-        cssPrefixes = ["Webkit", "Moz", "ms"],
-        emptyStyle = document.createElement("div").style;
 
     function Tween(elem, options, prop, end, easing) {
         return new Tween.prototype.init(elem, options, prop, end, easing);
@@ -5852,7 +5772,6 @@
 
     var
         fxNow, inProgress,
-        rfxtypes = /^(?:toggle|show|hide)$/,
         rrun = /queueHooks$/;
 
     function schedule() {
@@ -5864,20 +5783,6 @@
             }
 
             jQuery.fx.tick();
-        }
-    }
-
-    function createTween(value, prop, animation) {
-        var tween,
-            collection = (Animation.tweeners[prop] || []).concat(Animation.tweeners["*"]),
-            index = 0,
-            length = collection.length;
-        for (; index < length; index++) {
-            if ((tween = collection[index].call(animation, prop, value))) {
-
-                // We're done with this property
-                return tween;
-            }
         }
     }
 
@@ -6239,7 +6144,6 @@
             return ret;
         };
     });
-
 
     var rfocusable = /^(?:input|select|textarea|button)$/i,
         rclickable = /^(?:a|area)$/i;
@@ -6720,26 +6624,6 @@
         }
     });
 
-// Radios and checkboxes getter/setter
-    jQuery.each(["radio", "checkbox"], function () {
-        jQuery.valHooks[this] = {
-            set: function (elem, value) {
-                if (Array.isArray(value)) {
-                    return (elem.checked = jQuery.inArray(jQuery(elem).val(), value) > -1);
-                }
-            }
-        };
-        if (!support.checkOn) {
-            jQuery.valHooks[this].get = function (elem) {
-                return elem.getAttribute("value") === null ? "on" : elem.value;
-            };
-        }
-    });
-
-
-// Return jQuery for attributes-only inclusion
-
-
     support.focusin = "onfocusin" in window;
 
 
@@ -6918,12 +6802,6 @@
             return this.each(function () {
                 jQuery.event.trigger(type, data, this);
             });
-        },
-        triggerHandler: function (type, data) {
-            var elem = this[0];
-            if (elem) {
-                return jQuery.event.trigger(type, data, elem, true);
-            }
         }
     });
 
@@ -7080,9 +6958,6 @@
     };
 
     jQuery.fn.extend({
-        serialize: function () {
-            return jQuery.param(this.serializeArray());
-        },
         serializeArray: function () {
             return this.map(function () {
 
