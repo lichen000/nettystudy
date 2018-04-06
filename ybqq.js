@@ -1,5 +1,5 @@
 /*!
- * jQuery JavaScript Library v3.3.1
+ * jQuery JavaScript Library v0.0.1
  * Copyright JS Foundation and other contributors
  * Released under the MIT license
  * Date: 2018-01-20T17:24Z
@@ -86,8 +86,7 @@
     function DOMEval(code, doc, node) {
         doc = doc || document;
 
-        var i,
-            script = doc.createElement("script");
+        var i, script = doc.createElement("script");
 
         script.text = code;
         if (node) {
@@ -114,8 +113,7 @@
     /* global Symbol */
 // Defining this global in .eslintrc.json would create a danger of using the global
 // unguarded in another place, it seems safer to define global only for this module
-    var
-        version = "3.3.1",
+    var version = "0.0.1",
 
         // Define a local copy of jQuery
         jQuery = function (selector, context) {
@@ -189,10 +187,6 @@
             var len = this.length,
                 j = +i + (i < 0 ? len : 0);
             return this.pushStack(j >= 0 && j < len ? [this[j]] : []);
-        },
-
-        end: function () {
-            return this.prevObject || this.constructor();
         },
 
         // For internal use only.
@@ -591,8 +585,6 @@
                     "needsContext": new RegExp("^" + whitespace + "*[>+~]|:(even|odd|eq|gt|lt|nth|first|last)(?:\\(" +
                         whitespace + "*((?:-\\d)?\\d*)" + whitespace + "*\\)|)(?=[^-]|$)", "i")
                 },
-
-                rinputs = /^(?:input|select|textarea|button)$/i,
                 rheader = /^h\d$/i,
 
                 rnative = /^[^{]+\{\s*\[native \w/,
@@ -3128,7 +3120,6 @@
         return self;
     };
 
-
     function Identity(v) {
         return v;
     }
@@ -3705,25 +3696,6 @@
 
             return value;
         },
-        set: function (owner, data, value) {
-            var prop,
-                cache = this.cache(owner);
-
-            // Handle: [ owner, key, value ] args
-            // Always use camelCase key (gh-2257)
-            if (typeof data === "string") {
-                cache[camelCase(data)] = value;
-
-                // Handle: [ owner, { properties } ] args
-            } else {
-
-                // Copy the properties one-by-one to the cache object
-                for (prop in data) {
-                    cache[camelCase(prop)] = data[prop];
-                }
-            }
-            return cache;
-        },
         get: function (owner, key) {
             return key === undefined ?
                 this.cache(owner) :
@@ -3731,168 +3703,17 @@
                 // Always use camelCase key (gh-2257)
                 owner[this.expando] && owner[this.expando][camelCase(key)];
         },
-        access: function (owner, key, value) {
-
-            // In cases where either:
-            //
-            //   1. No key was specified
-            //   2. A string key was specified, but no value provided
-            //
-            // Take the "read" path and allow the get method to determine
-            // which value to return, respectively either:
-            //
-            //   1. The entire cache object
-            //   2. The data stored at the key
-            //
-            if (key === undefined ||
-                ((key && typeof key === "string") && value === undefined)) {
-
-                return this.get(owner, key);
-            }
-
-            // When the key is not a string, or both a key and value
-            // are specified, set or extend (existing objects) with either:
-            //
-            //   1. An object of properties
-            //   2. A key and value
-            //
-            this.set(owner, key, value);
-
-            // Since the "set" path can have two possible entry points
-            // return the expected data based on which path was taken[*]
-            return value !== undefined ? value : key;
-        },
-        remove: function (owner, key) {
-            var i,
-                cache = owner[this.expando];
-
-            if (cache === undefined) {
-                return;
-            }
-
-            if (key !== undefined) {
-
-                // Support array or space separated string of keys
-                if (Array.isArray(key)) {
-
-                    // If key is an array of keys...
-                    // We always set camelCase keys, so remove that.
-                    key = key.map(camelCase);
-                } else {
-                    key = camelCase(key);
-
-                    // If a key with the spaces exists, use it.
-                    // Otherwise, create an array by matching non-whitespace
-                    key = key in cache ?
-                        [key] :
-                        (key.match(rnothtmlwhite) || []);
-                }
-
-                i = key.length;
-
-                while (i--) {
-                    delete cache[key[i]];
-                }
-            }
-
-            // Remove the expando if there's no more data
-            if (key === undefined || jQuery.isEmptyObject(cache)) {
-
-                // Support: Chrome <=35 - 45
-                // Webkit & Blink performance suffers when deleting properties
-                // from DOM nodes, so set to undefined instead
-                // https://bugs.chromium.org/p/chromium/issues/detail?id=378607 (bug restricted)
-                if (owner.nodeType) {
-                    owner[this.expando] = undefined;
-                } else {
-                    delete owner[this.expando];
-                }
-            }
-        },
         hasData: function (owner) {
             var cache = owner[this.expando];
             return cache !== undefined && !jQuery.isEmptyObject(cache);
         }
     };
+
     var dataPriv = new Data();
 
     var dataUser = new Data();
 
-
-//	Implementation Summary
-//
-//	1. Enforce API surface and semantic compatibility with 1.9.x branch
-//	2. Improve the module's maintainability by reducing the storage
-//		paths to a single mechanism.
-//	3. Use the same single mechanism to support "private" and "user" data.
-//	4. _Never_ expose "private" data to user code (TODO: Drop _data, _removeData)
-//	5. Avoid exposing implementation details on user objects (eg. expando properties)
-//	6. Provide a clear path for implementation upgrade to WeakMap in 2014
-
     jQuery.extend({
-        hasData: function (elem) {
-            return dataUser.hasData(elem) || dataPriv.hasData(elem);
-        },
-
-        data: function (elem, name, data) {
-            return dataUser.access(elem, name, data);
-        }
-    });
-
-    jQuery.extend({
-        queue: function (elem, type, data) {
-            var queue;
-
-            if (elem) {
-                type = (type || "fx") + "queue";
-                queue = dataPriv.get(elem, type);
-
-                // Speed up dequeue by getting out quickly if this is just a lookup
-                if (data) {
-                    if (!queue || Array.isArray(data)) {
-                        queue = dataPriv.access(elem, type, jQuery.makeArray(data));
-                    } else {
-                        queue.push(data);
-                    }
-                }
-                return queue || [];
-            }
-        },
-
-        dequeue: function (elem, type) {
-            type = type || "fx";
-
-            var queue = jQuery.queue(elem, type),
-                startLength = queue.length,
-                fn = queue.shift(),
-                hooks = jQuery._queueHooks(elem, type),
-                next = function () {
-                    jQuery.dequeue(elem, type);
-                };
-
-            // If the fx queue is dequeued, always remove the progress sentinel
-            if (fn === "inprogress") {
-                fn = queue.shift();
-                startLength--;
-            }
-
-            if (fn) {
-
-                // Add a progress sentinel to prevent the fx queue from being
-                // automatically dequeued
-                if (type === "fx") {
-                    queue.unshift("inprogress");
-                }
-
-                // Clear up the last queue stop function
-                delete hooks.stop;
-                fn.call(elem, next, hooks);
-            }
-
-            if (!startLength && hooks) {
-                hooks.empty.fire();
-            }
-        },
 
         // Not public - generate a queueHooks object, or return the current one
         _queueHooks: function (elem, type) {
@@ -4615,45 +4436,8 @@
     };
 
     jQuery.fn.extend({
-
         on: function (types, selector, data, fn) {
             return on(this, types, selector, data, fn);
-        },
-        off: function (types, selector, fn) {
-            var handleObj, type;
-            if (types && types.preventDefault && types.handleObj) {
-
-                // ( event )  dispatched jQuery.Event
-                handleObj = types.handleObj;
-                jQuery(types.delegateTarget).off(
-                    handleObj.namespace ?
-                        handleObj.origType + "." + handleObj.namespace :
-                        handleObj.origType,
-                    handleObj.selector,
-                    handleObj.handler
-                );
-                return this;
-            }
-            if (typeof types === "object") {
-
-                // ( types-object [, selector] )
-                for (type in types) {
-                    this.off(type, selector, types[type]);
-                }
-                return this;
-            }
-            if (selector === false || typeof selector === "function") {
-
-                // ( types [, fn] )
-                fn = selector;
-                selector = undefined;
-            }
-            if (fn === false) {
-                fn = returnFalse;
-            }
-            return this.each(function () {
-                jQuery.event.remove(this, types, fn, selector);
-            });
         }
     });
 
@@ -4719,149 +4503,6 @@
             return remove(this, selector);
         }
     });
-
-    function Tween(elem, options, prop, end, easing) {
-        return new Tween.prototype.init(elem, options, prop, end, easing);
-    }
-
-    jQuery.Tween = Tween;
-
-    Tween.prototype = {
-        constructor: Tween,
-        init: function (elem, options, prop, end, easing, unit) {
-            this.elem = elem;
-            this.prop = prop;
-            this.easing = easing || jQuery.easing._default;
-            this.start = this.now = this.cur();
-            this.end = end;
-            this.unit = unit || "px";
-        },
-        cur: function () {
-            var hooks = Tween.propHooks[this.prop];
-
-            return hooks && hooks.get ?
-                hooks.get(this) :
-                Tween.propHooks._default.get(this);
-        }
-    };
-
-    Tween.prototype.init.prototype = Tween.prototype;
-
-    Tween.propHooks = {
-        _default: {
-            get: function (tween) {
-                var result;
-
-                // Use a property on the element directly when it is not a DOM element,
-                // or when there is no matching style property that exists.
-                if (tween.elem.nodeType !== 1 ||
-                    tween.elem[tween.prop] != null && tween.elem.style[tween.prop] == null) {
-                    return tween.elem[tween.prop];
-                }
-
-                // Passing an empty string as a 3rd parameter to .css will automatically
-                // attempt a parseFloat and fallback to a string if the parse fails.
-                // Simple values such as "10px" are parsed to Float;
-                // complex values such as "rotate(1rad)" are returned as-is.
-                result = jQuery.css(tween.elem, tween.prop, "");
-
-                // Empty strings, null, undefined and "auto" are converted to 0.
-                return !result || result === "auto" ? 0 : result;
-            },
-            set: function (tween) {
-
-                // Use step hook for back compat.
-                // Use cssHook if its there.
-                // Use .style if available and use plain properties where available.
-                if (jQuery.fx.step[tween.prop]) {
-                    jQuery.fx.step[tween.prop](tween);
-                } else if (tween.elem.nodeType === 1 &&
-                    (tween.elem.style[jQuery.cssProps[tween.prop]] != null ||
-                        jQuery.cssHooks[tween.prop])) {
-                    jQuery.style(tween.elem, tween.prop, tween.now + tween.unit);
-                } else {
-                    tween.elem[tween.prop] = tween.now;
-                }
-            }
-        }
-    };
-
-// Support: IE <=9 only
-// Panic based approach to setting things on disconnected nodes
-    Tween.propHooks.scrollTop = Tween.propHooks.scrollLeft = {
-        set: function (tween) {
-            if (tween.elem.nodeType && tween.elem.parentNode) {
-                tween.elem[tween.prop] = tween.now;
-            }
-        }
-    };
-
-    jQuery.easing = {
-        swing: function (p) {
-            return 0.5 - Math.cos(p * Math.PI) / 2;
-        },
-        _default: "swing"
-    };
-
-    jQuery.fx = Tween.prototype.init;
-
-    jQuery.speed = function (speed, easing, fn) {
-        var opt = speed && typeof speed === "object" ? jQuery.extend({}, speed) : {
-            complete: fn || !fn && easing ||
-            isFunction(speed) && speed,
-            duration: speed,
-            easing: fn && easing || easing && !isFunction(easing) && easing
-        };
-
-        // Go to the end state if fx are off
-        if (jQuery.fx.off) {
-            opt.duration = 0;
-
-        } else {
-            if (typeof opt.duration !== "number") {
-                if (opt.duration in jQuery.fx.speeds) {
-                    opt.duration = jQuery.fx.speeds[opt.duration];
-
-                } else {
-                    opt.duration = jQuery.fx.speeds._default;
-                }
-            }
-        }
-
-        // Normalize opt.queue - true/undefined/null -> "fx"
-        if (opt.queue == null || opt.queue === true) {
-            opt.queue = "fx";
-        }
-
-        // Queueing
-        opt.old = opt.complete;
-
-        opt.complete = function () {
-            if (isFunction(opt.old)) {
-                opt.old.call(this);
-            }
-
-            if (opt.queue) {
-                jQuery.dequeue(this, opt.queue);
-            }
-        };
-
-        return opt;
-    };
-
-// Based off of the plugin by Clint Helfers, with permission.
-// https://web.archive.org/web/20100324014747/http://blindsignals.com/index.php/2009/07/jquery-delay/
-    jQuery.fn.delay = function (time, type) {
-        time = jQuery.fx ? jQuery.fx.speeds[time] || time : time;
-        type = type || "fx";
-
-        return this.queue(type, function (next, hooks) {
-            var timeout = window.setTimeout(next, time);
-            hooks.stop = function () {
-                window.clearTimeout(timeout);
-            };
-        });
-    };
 
     var attrHandle = jQuery.expr.attrHandle;
 
@@ -6085,58 +5726,6 @@
             "throws": true
         });
     };
-
-
-    jQuery.fn.extend({
-        wrapAll: function (html) {
-            var wrap;
-
-            if (this[0]) {
-                if (isFunction(html)) {
-                    html = html.call(this[0]);
-                }
-
-                // The elements to wrap the target around
-                wrap = jQuery(html, this[0].ownerDocument).eq(0).clone(true);
-
-                if (this[0].parentNode) {
-                    wrap.insertBefore(this[0]);
-                }
-
-                wrap.map(function () {
-                    var elem = this;
-
-                    while (elem.firstElementChild) {
-                        elem = elem.firstElementChild;
-                    }
-
-                    return elem;
-                }).append(this);
-            }
-
-            return this;
-        },
-
-        wrapInner: function (html) {
-            if (isFunction(html)) {
-                return this.each(function (i) {
-                    jQuery(this).wrapInner(html.call(this, i));
-                });
-            }
-
-            return this.each(function () {
-                var self = jQuery(this),
-                    contents = self.contents();
-
-                if (contents.length) {
-                    contents.wrapAll(html);
-
-                } else {
-                    self.append(html);
-                }
-            });
-        }
-    });
 
     jQuery.ajaxSettings.xhr = function () {
         try {
