@@ -5645,9 +5645,6 @@
     });
 
     jQuery.fn.extend({
-        detach: function (selector) {
-            return remove(this, selector, true);
-        },
 
         remove: function (selector) {
             return remove(this, selector);
@@ -5901,18 +5898,6 @@
             pixelBoxStyles: function () {
                 computeStyleTests();
                 return pixelBoxStylesVal;
-            },
-            pixelPosition: function () {
-                computeStyleTests();
-                return pixelPositionVal;
-            },
-            reliableMarginLeft: function () {
-                computeStyleTests();
-                return reliableMarginLeftVal;
-            },
-            scrollboxSize: function () {
-                computeStyleTests();
-                return scrollboxSizeVal;
             }
         });
     })();
@@ -5970,39 +5955,12 @@
             ret;
     }
 
-
-    function addGetHookIf(conditionFn, hookFn) {
-
-        // Define the hook, we'll check on the first run if it's really needed.
-        return {
-            get: function () {
-                if (conditionFn()) {
-
-                    // Hook not needed (or it's not possible to use it due
-                    // to missing dependency), remove it.
-                    delete this.get;
-                    return;
-                }
-
-                // Hook needed; redefine it so that the support test is not executed again.
-                return (this.get = hookFn).apply(this, arguments);
-            }
-        };
-    }
-
-
     var
 
         // Swappable if display is none or starts with table
         // except "table", "table-cell", or "table-caption"
         // See here for display values: https://developer.mozilla.org/en-US/docs/CSS/display
-        rdisplayswap = /^(none|table(?!-c[ea]).+)/,
-        rcustomProp = /^--/,
-        cssShow = {position: "absolute", visibility: "hidden", display: "block"},
-        cssNormalTransform = {
-            letterSpacing: "0",
-            fontWeight: "400"
-        },
+
 
         cssPrefixes = ["Webkit", "Moz", "ms"],
         emptyStyle = document.createElement("div").style;
@@ -6029,25 +5987,7 @@
 
 // Return a property mapped along what jQuery.cssProps suggests or to
 // a vendor prefixed property.
-    function finalPropName(name) {
-        var ret = jQuery.cssProps[name];
-        if (!ret) {
-            ret = jQuery.cssProps[name] = vendorPropName(name) || name;
-        }
-        return ret;
-    }
 
-    function setPositiveNumber(elem, value, subtract) {
-
-        // Any relative (+/-) values have already been
-        // normalized at this point
-        var matches = rcssNum.exec(value);
-        return matches ?
-
-            // Guard against undefined "subtract", e.g., when used as in cssHooks
-            Math.max(0, matches[2] - (subtract || 0)) + (matches[3] || "px") :
-            value;
-    }
 
     function boxModelAdjustment(elem, dimension, box, isBorderBox, styles, computedVal) {
         var i = dimension === "width" ? 1 : 0,
@@ -6114,59 +6054,6 @@
         return delta;
     }
 
-    function getWidthOrHeight(elem, dimension, extra) {
-
-        // Start with computed style
-        var styles = getStyles(elem),
-            val = curCSS(elem, dimension, styles),
-            isBorderBox = jQuery.css(elem, "boxSizing", false, styles) === "border-box",
-            valueIsBorderBox = isBorderBox;
-
-        // Support: Firefox <=54
-        // Return a confounding non-pixel value or feign ignorance, as appropriate.
-        if (rnumnonpx.test(val)) {
-            if (!extra) {
-                return val;
-            }
-            val = "auto";
-        }
-
-        // Check for style in case a browser which returns unreliable values
-        // for getComputedStyle silently falls back to the reliable elem.style
-        valueIsBorderBox = valueIsBorderBox &&
-            (support.boxSizingReliable() || val === elem.style[dimension]);
-
-        // Fall back to offsetWidth/offsetHeight when value is "auto"
-        // This happens for inline elements with no explicit setting (gh-3571)
-        // Support: Android <=4.1 - 4.3 only
-        // Also use offsetWidth/offsetHeight for misreported inline dimensions (gh-3602)
-        if (val === "auto" ||
-            !parseFloat(val) && jQuery.css(elem, "display", false, styles) === "inline") {
-
-            val = elem["offset" + dimension[0].toUpperCase() + dimension.slice(1)];
-
-            // offsetWidth/offsetHeight provide border-box values
-            valueIsBorderBox = true;
-        }
-
-        // Normalize "" and auto
-        val = parseFloat(val) || 0;
-
-        // Adjust for the element's box model
-        return (val +
-            boxModelAdjustment(
-                elem,
-                dimension,
-                extra || (isBorderBox ? "border" : "content"),
-                valueIsBorderBox,
-                styles,
-
-                // Provide the current computed size to request scroll gutter calculation (gh-3589)
-                val
-            )
-        ) + "px";
-    }
-
     function Tween(elem, options, prop, end, easing) {
         return new Tween.prototype.init(elem, options, prop, end, easing);
     }
@@ -6190,30 +6077,6 @@
             return hooks && hooks.get ?
                 hooks.get(this) :
                 Tween.propHooks._default.get(this);
-        },
-        run: function (percent) {
-            var eased,
-                hooks = Tween.propHooks[this.prop];
-
-            if (this.options.duration) {
-                this.pos = eased = jQuery.easing[this.easing](
-                    percent, this.options.duration * percent, 0, 1, this.options.duration
-                );
-            } else {
-                this.pos = eased = percent;
-            }
-            this.now = (this.end - this.start) * eased + this.start;
-
-            if (this.options.step) {
-                this.options.step.call(this.elem, this.now, this);
-            }
-
-            if (hooks && hooks.set) {
-                hooks.set(this);
-            } else {
-                Tween.propHooks._default.set(this);
-            }
-            return this;
         }
     };
 
@@ -6298,14 +6161,6 @@
         }
     }
 
-// Animations created synchronously will run synchronously
-    function createFxNow() {
-        window.setTimeout(function () {
-            fxNow = undefined;
-        });
-        return (fxNow = Date.now());
-    }
-
     function createTween(value, prop, animation) {
         var tween,
             collection = (Animation.tweeners[prop] || []).concat(Animation.tweeners["*"]),
@@ -6316,215 +6171,6 @@
 
                 // We're done with this property
                 return tween;
-            }
-        }
-    }
-
-    function defaultPrefilter(elem, props, opts) {
-        var prop, value, toggle, hooks, oldfire, propTween, restoreDisplay, display,
-            isBox = "width" in props || "height" in props,
-            anim = this,
-            orig = {},
-            style = elem.style,
-            hidden = elem.nodeType && isHiddenWithinTree(elem),
-            dataShow = dataPriv.get(elem, "fxshow");
-
-        // Queue-skipping animations hijack the fx hooks
-        if (!opts.queue) {
-            hooks = jQuery._queueHooks(elem, "fx");
-            if (hooks.unqueued == null) {
-                hooks.unqueued = 0;
-                oldfire = hooks.empty.fire;
-                hooks.empty.fire = function () {
-                    if (!hooks.unqueued) {
-                        oldfire();
-                    }
-                };
-            }
-            hooks.unqueued++;
-
-            anim.always(function () {
-
-                // Ensure the complete handler is called before this completes
-                anim.always(function () {
-                    hooks.unqueued--;
-                    if (!jQuery.queue(elem, "fx").length) {
-                        hooks.empty.fire();
-                    }
-                });
-            });
-        }
-
-        // Detect show/hide animations
-        for (prop in props) {
-            value = props[prop];
-            if (rfxtypes.test(value)) {
-                delete props[prop];
-                toggle = toggle || value === "toggle";
-                if (value === (hidden ? "hide" : "show")) {
-
-                    // Pretend to be hidden if this is a "show" and
-                    // there is still data from a stopped show/hide
-                    if (value === "show" && dataShow && dataShow[prop] !== undefined) {
-                        hidden = true;
-
-                        // Ignore all other no-op show/hide data
-                    } else {
-                        continue;
-                    }
-                }
-                orig[prop] = dataShow && dataShow[prop] || jQuery.style(elem, prop);
-            }
-        }
-
-        // Bail out if this is a no-op like .hide().hide()
-        propTween = !jQuery.isEmptyObject(props);
-        if (!propTween && jQuery.isEmptyObject(orig)) {
-            return;
-        }
-
-        // Restrict "overflow" and "display" styles during box animations
-        if (isBox && elem.nodeType === 1) {
-
-            // Support: IE <=9 - 11, Edge 12 - 15
-            // Record all 3 overflow attributes because IE does not infer the shorthand
-            // from identically-valued overflowX and overflowY and Edge just mirrors
-            // the overflowX value there.
-            opts.overflow = [style.overflow, style.overflowX, style.overflowY];
-
-            // Identify a display type, preferring old show/hide data over the CSS cascade
-            restoreDisplay = dataShow && dataShow.display;
-            if (restoreDisplay == null) {
-                restoreDisplay = dataPriv.get(elem, "display");
-            }
-            display = jQuery.css(elem, "display");
-            if (display === "none") {
-                if (restoreDisplay) {
-                    display = restoreDisplay;
-                } else {
-
-                    // Get nonempty value(s) by temporarily forcing visibility
-                    showHide([elem], true);
-                    restoreDisplay = elem.style.display || restoreDisplay;
-                    display = jQuery.css(elem, "display");
-                    showHide([elem]);
-                }
-            }
-
-            // Animate inline elements as inline-block
-            if (display === "inline" || display === "inline-block" && restoreDisplay != null) {
-                if (jQuery.css(elem, "float") === "none") {
-
-                    // Restore the original display value at the end of pure show/hide animations
-                    if (!propTween) {
-                        anim.done(function () {
-                            style.display = restoreDisplay;
-                        });
-                        if (restoreDisplay == null) {
-                            display = style.display;
-                            restoreDisplay = display === "none" ? "" : display;
-                        }
-                    }
-                    style.display = "inline-block";
-                }
-            }
-        }
-
-        if (opts.overflow) {
-            style.overflow = "hidden";
-            anim.always(function () {
-                style.overflow = opts.overflow[0];
-                style.overflowX = opts.overflow[1];
-                style.overflowY = opts.overflow[2];
-            });
-        }
-
-        // Implement show/hide animations
-        propTween = false;
-        for (prop in orig) {
-
-            // General show/hide setup for this element animation
-            if (!propTween) {
-                if (dataShow) {
-                    if ("hidden" in dataShow) {
-                        hidden = dataShow.hidden;
-                    }
-                } else {
-                    dataShow = dataPriv.access(elem, "fxshow", {display: restoreDisplay});
-                }
-
-                // Store hidden/visible for toggle so `.stop().toggle()` "reverses"
-                if (toggle) {
-                    dataShow.hidden = !hidden;
-                }
-
-                // Show elements before animating them
-                if (hidden) {
-                    showHide([elem], true);
-                }
-
-                /* eslint-disable no-loop-func */
-
-                anim.done(function () {
-
-                    /* eslint-enable no-loop-func */
-
-                    // The final step of a "hide" animation is actually hiding the element
-                    if (!hidden) {
-                        showHide([elem]);
-                    }
-                    dataPriv.remove(elem, "fxshow");
-                    for (prop in orig) {
-                        jQuery.style(elem, prop, orig[prop]);
-                    }
-                });
-            }
-
-            // Per-property setup
-            propTween = createTween(hidden ? dataShow[prop] : 0, prop, anim);
-            if (!(prop in dataShow)) {
-                dataShow[prop] = propTween.start;
-                if (hidden) {
-                    propTween.end = propTween.start;
-                    propTween.start = 0;
-                }
-            }
-        }
-    }
-
-    function propFilter(props, specialEasing) {
-        var index, name, easing, value, hooks;
-
-        // camelCase, specialEasing and expand cssHook pass
-        for (index in props) {
-            name = camelCase(index);
-            easing = specialEasing[name];
-            value = props[index];
-            if (Array.isArray(value)) {
-                easing = value[1];
-                value = props[index] = value[0];
-            }
-
-            if (index !== name) {
-                props[name] = value;
-                delete props[index];
-            }
-
-            hooks = jQuery.cssHooks[name];
-            if (hooks && "expand" in hooks) {
-                value = hooks.expand(value);
-                delete props[name];
-
-                // Not quite $.extend, this won't overwrite existing keys.
-                // Reusing 'index' because we have the correct "name"
-                for (index in value) {
-                    if (!(index in props)) {
-                        props[index] = value[index];
-                        specialEasing[index] = easing;
-                    }
-                }
-            } else {
-                specialEasing[name] = easing;
             }
         }
     }
