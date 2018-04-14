@@ -1,5 +1,8 @@
-package mangolost.nettystudy.bioserver;
+package mangolost.nettystudy.bio.bioserver;
 
+/**
+ *
+ */
 public class BioServerApplication {
 
     public static void main(String[] args) {

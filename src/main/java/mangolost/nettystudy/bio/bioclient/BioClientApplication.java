@@ -1,4 +1,4 @@
-package mangolost.nettystudy.bioclient;
+package mangolost.nettystudy.bio.bioclient;
 
 public class BioClientApplication {
 

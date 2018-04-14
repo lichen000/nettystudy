@@ -1,37 +1,32 @@
-package mangolost.nettystudy.bioclient;
+package mangolost.nettystudy.bio.bioserver;
 
 import java.io.*;
 import java.net.Socket;
 
-public class BioClient {
+public class BioServerHandler implements Runnable {
 
-    private final String host;
-    private final int port;
+    private Socket socket;
 
-    public BioClient(String host, int port) {
-        this.host = host;
-        this.port = port;
+    public BioServerHandler(Socket socket) {
+        this.socket = socket;
     }
 
-    public void start() {
-        String msg = "Hello World" + System.getProperty("line.separator");
-        Socket socket = null;
+    @Override
+    public void run() {
         BufferedReader in = null;
         OutputStream out = null;
         try {
-            socket = new Socket(host, port);
             in = new BufferedReader(new InputStreamReader(socket.getInputStream(), "UTF-8"));
             out = socket.getOutputStream();
-            out.write(msg.getBytes("UTF-8")); //发送消息
+            String msg = in.readLine(); //如果没有消息，就阻塞
+            System.out.println("服务器收到消息：" + msg);
+            // 把msg反转后输出
+            String result = new StringBuilder(msg).reverse().toString();
+            out.write((result + System.getProperty("line.separator")).getBytes("UTF-8")); //给客户端返回消息
             out.flush();
-
-            //进入轮询，接受服务端消息
-            String res = in.readLine(); //如果没有消息，就阻塞
-            System.out.println("从服务器收到的结果为：" + res);
-        } catch (Exception e) {
+        } catch (IOException e) {
             e.printStackTrace();
         } finally {
-            //必要的清理工作
             if (in != null) {
                 try {
                     in.close();
@@ -50,7 +45,7 @@ public class BioClient {
                     out = null;
                 }
             }
-            if(socket != null){
+            if (socket != null) {
                 try {
                     socket.close();
                 } catch (IOException ex) {

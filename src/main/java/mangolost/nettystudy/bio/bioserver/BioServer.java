@@ -1,4 +1,4 @@
-package mangolost.nettystudy.bioserver;
+package mangolost.nettystudy.bio.bioserver;
 
 import java.io.IOException;
 import java.net.ServerSocket;
